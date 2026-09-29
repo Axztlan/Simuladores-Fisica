@@ -1,0 +1,2981 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Angry Birds - Simulador de Tiro Parabólico</title>
+<h1> Santes Ochoa Miguel Angel </h1>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: linear-gradient(135deg, #172033, #334155);
+    color: white;
+}
+
+/* ================= HEADER ================= */
+
+header {
+    text-align: center;
+    padding: 22px;
+    background: #111827;
+    border-bottom: 4px solid #ef4444;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 34px;
+}
+
+header p {
+    color: #cbd5e1;
+}
+
+/* ================= CONTENEDOR ================= */
+
+.contenedor {
+    width: 95%;
+    max-width: 1450px;
+    margin: 20px auto;
+}
+
+/* ================= CINTILLO ================= */
+
+.teoria {
+    background: #f8fafc;
+    color: #172033;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+.teoria h2 {
+    margin-top: 0;
+    color: #dc2626;
+}
+
+.teoria-contenido {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+
+.teoria-item {
+    background: #e2e8f0;
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.teoria-item h3 {
+    margin-top: 0;
+}
+
+/* ================= PRINCIPAL ================= */
+
+.panel-principal {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.tarjeta {
+    background: #f8fafc;
+    color: #111827;
+    border-radius: 15px;
+    padding: 18px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.25);
+}
+
+/* ================= CANVAS ================= */
+
+canvas {
+    width: 100%;
+    display: block;
+    border-radius: 12px;
+    border: 3px solid #0f172a;
+    background: #aee3ff;
+    cursor: grab;
+}
+
+canvas:active {
+    cursor: grabbing;
+}
+
+/* ================= BOTONES ================= */
+
+.botones {
+    text-align: center;
+    margin-top: 12px;
+}
+
+button {
+    border: none;
+    padding: 12px 16px;
+    margin: 5px;
+    border-radius: 9px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.btn-lanzar {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-lanzar:hover {
+    background: #dc2626;
+}
+
+.btn-reiniciar {
+    background: #334155;
+    color: white;
+}
+
+.btn-rastro {
+    background: #16a34a;
+    color: white;
+}
+
+.btn-musica {
+    background: #7c3aed;
+    color: white;
+}
+
+/* ================= CONTROLES ================= */
+
+.controles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+/* ================= SECCIONES ================= */
+
+.seccion {
+    margin-top: 15px;
+    padding: 15px;
+    background: #e2e8f0;
+    border-radius: 10px;
+}
+
+.seccion h3 {
+    margin-top: 0;
+}
+
+/* ================= DATOS ================= */
+
+.datos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.dato {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    border-left: 4px solid #ef4444;
+}
+
+.dato span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.dato strong {
+    font-size: 17px;
+}
+
+/* ================= FORMULAS ================= */
+
+.formula {
+    background: #0f172a;
+    color: #f8fafc;
+    padding: 10px;
+    border-radius: 8px;
+    margin: 7px 0;
+    font-family: Consolas, monospace;
+}
+
+/* ================= HISTORIAL ================= */
+
+#historial {
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.tiro {
+    padding: 9px;
+    margin-bottom: 6px;
+    background: white;
+    border-radius: 7px;
+    border-left: 4px solid #ef4444;
+    font-size: 13px;
+}
+
+/* ================= ESTADO ================= */
+
+.estado {
+    text-align: center;
+    font-weight: bold;
+    color: #dc2626;
+    margin: 10px;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width: 900px) {
+
+    .panel-principal {
+        grid-template-columns: 1fr;
+    }
+
+    .teoria-contenido {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 500px) {
+
+    .controles,
+    .datos {
+        grid-template-columns: 1fr;
+    }
+
+    header h1 {
+        font-size: 25px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+    <h1>🐦 Angry Birds: Tiro Parabólico</h1>
+
+    <p>
+        Simulador interactivo de movimiento parabólico
+    </p>
+
+</header>
+
+
+<div class="contenedor">
+
+
+<!-- ================================================= -->
+<!-- TEORIA -->
+<!-- ================================================= -->
+
+<section class="teoria">
+
+    <h2>📚 ¿Qué es el tiro parabólico?</h2>
+
+    <div class="teoria-contenido">
+
+        <div class="teoria-item">
+
+            <h3>🚀 ¿Qué es?</h3>
+
+            <p>
+                El tiro parabólico es el movimiento que realiza
+                un objeto cuando es lanzado con una velocidad
+                inicial formando un ángulo con respecto al suelo.
+            </p>
+
+            <p>
+                Su trayectoria tiene forma de parábola debido
+                principalmente a la acción de la gravedad.
+            </p>
+
+        </div>
+
+
+        <div class="teoria-item">
+
+            <h3>🎯 ¿Para qué sirve?</h3>
+
+            <p>
+                Se utiliza para estudiar y predecir el movimiento
+                de objetos lanzados al aire.
+            </p>
+
+            <p>
+                Aparece en situaciones como deportes, lanzamientos,
+                proyectiles y diferentes problemas de física.
+            </p>
+
+        </div>
+
+
+        <div class="teoria-item">
+
+            <h3>📐 Características</h3>
+
+            <p>
+                El movimiento horizontal mantiene una velocidad
+                aproximadamente constante.
+            </p>
+
+            <p>
+                En el movimiento vertical existe una aceleración
+                causada por la gravedad.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================================================= -->
+<!-- SIMULADOR -->
+<!-- ================================================= -->
+
+<div class="panel-principal">
+
+
+<!-- ================================================= -->
+<!-- ESCENA -->
+<!-- ================================================= -->
+
+<div class="tarjeta">
+
+    <h2>🎯 Campo de lanzamiento</h2>
+
+    <p>
+        <b>Modo interactivo:</b>
+        arrastra el pájaro hacia atrás y suéltalo para lanzarlo.
+    </p>
+
+    <canvas
+        id="canvas"
+        width="1000"
+        height="550">
+    </canvas>
+
+
+    <div
+        class="estado"
+        id="estado">
+
+        🐦 ¡Arrastra el pájaro para lanzarlo!
+
+    </div>
+
+
+    <div class="botones">
+
+        <button
+            class="btn-lanzar"
+            id="btnLanzar">
+
+            🐦 LANZAR
+
+        </button>
+
+
+        <button
+            class="btn-reiniciar"
+            id="btnReiniciar">
+
+            🔄 NUEVO PÁJARO
+
+        </button>
+
+
+        <button
+            class="btn-rastro"
+            id="btnRastro">
+
+            🧹 BORRAR RASTROS
+
+        </button>
+
+
+        <button
+            class="btn-musica"
+            id="btnMusica">
+
+            🔊 Música: OFF
+
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- PANEL DE DATOS -->
+<!-- ================================================= -->
+
+<div class="tarjeta">
+
+    <h2>⚙️ Parámetros</h2>
+
+
+    <div class="controles">
+
+        <div>
+
+            <label>
+                Velocidad inicial (m/s)
+            </label>
+
+            <input
+                type="number"
+                id="velocidad"
+                value="28"
+                min="1"
+                max="100">
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Ángulo (°)
+            </label>
+
+            <input
+                type="number"
+                id="angulo"
+                value="45"
+                min="1"
+                max="89">
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Altura inicial (m)
+            </label>
+
+            <input
+                type="number"
+                id="altura"
+                value="2"
+                min="0"
+                max="50">
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Gravedad (m/s²)
+            </label>
+
+            <input
+                type="number"
+                id="gravedad"
+                value="9.81"
+                min="0.1"
+                max="30"
+                step="0.01">
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Masa del pájaro (kg)
+            </label>
+
+            <input
+                type="number"
+                id="masa"
+                value="1"
+                min="0.1"
+                step="0.1">
+
+        </div>
+
+
+        <div>
+
+            <label>
+                Número de bloques
+            </label>
+
+            <input
+                type="number"
+                id="numBloques"
+                value="5"
+                min="1"
+                max="8">
+
+        </div>
+
+    </div>
+
+
+<!-- ================================================= -->
+<!-- CALCULOS -->
+<!-- ================================================= -->
+
+<div class="seccion">
+
+    <h3>📊 Cálculos en tiempo real</h3>
+
+    <div class="datos">
+
+        <div class="dato">
+            <span>Tiempo</span>
+            <strong id="tiempo">0.00 s</strong>
+        </div>
+
+        <div class="dato">
+            <span>Posición X</span>
+            <strong id="posX">0.00 m</strong>
+        </div>
+
+        <div class="dato">
+            <span>Posición Y</span>
+            <strong id="posY">2.00 m</strong>
+        </div>
+
+        <div class="dato">
+            <span>Velocidad</span>
+            <strong id="velActual">0.00 m/s</strong>
+        </div>
+
+        <div class="dato">
+            <span>Vx</span>
+            <strong id="vx">0.00 m/s</strong>
+        </div>
+
+        <div class="dato">
+            <span>Vy</span>
+            <strong id="vy">0.00 m/s</strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- RESULTADOS -->
+<!-- ================================================= -->
+
+<div class="seccion">
+
+    <h3>📐 Resultados teóricos</h3>
+
+    <div class="datos">
+
+        <div class="dato">
+
+            <span>
+                Tiempo hasta altura máxima
+            </span>
+
+            <strong id="tiempoMax">
+                0.00 s
+            </strong>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span>
+                Altura máxima
+            </span>
+
+            <strong id="alturaMax">
+                0.00 m
+            </strong>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span>
+                Tiempo de vuelo
+            </span>
+
+            <strong id="tiempoVuelo">
+                0.00 s
+            </strong>
+
+        </div>
+
+
+        <div class="dato">
+
+            <span>
+                Alcance
+            </span>
+
+            <strong id="alcance">
+                0.00 m
+            </strong>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- FORMULAS -->
+<!-- ================================================= -->
+
+<div class="seccion">
+
+    <h3>📚 Fórmulas básicas</h3>
+
+    <div class="formula">
+        Vx = V₀ · cos(θ)
+    </div>
+
+    <div class="formula">
+        Vy = V₀ · sin(θ) − gt
+    </div>
+
+    <div class="formula">
+        x = V₀ · cos(θ) · t
+    </div>
+
+    <div class="formula">
+        y = y₀ + V₀ · sin(θ)t − ½gt²
+    </div>
+
+    <div class="formula">
+        v = √(Vx² + Vy²)
+    </div>
+
+    <div class="formula">
+        tₘáₓ = V₀ · sin(θ) / g
+    </div>
+
+    <div class="formula">
+        hₘáₓ = y₀ + V₀²sin²(θ)/(2g)
+    </div>
+
+</div>
+
+
+<!-- ================================================= -->
+<!-- HISTORIAL -->
+<!-- ================================================= -->
+
+<div class="seccion">
+
+    <h3>📜 Historial de tiros</h3>
+
+    <div id="historial">
+
+        <p>
+            No hay tiros registrados.
+        </p>
+
+    </div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   VARIABLES
+===================================================== */
+
+const canvas =
+    document.getElementById("canvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+const velocidadInput =
+    document.getElementById("velocidad");
+
+const anguloInput =
+    document.getElementById("angulo");
+
+const alturaInput =
+    document.getElementById("altura");
+
+const gravedadInput =
+    document.getElementById("gravedad");
+
+const masaInput =
+    document.getElementById("masa");
+
+const numBloquesInput =
+    document.getElementById("numBloques");
+
+
+let pajaro = null;
+
+let animacion = null;
+
+let rastros = [];
+
+let historial = [];
+
+let bloques = [];
+
+let arrastrando = false;
+
+let posicionMouse = {
+    x: 0,
+    y: 0
+};
+
+
+let mundo = {
+
+    ancho: 50,
+
+    alto: 25
+
+};
+
+
+/* =====================================================
+   DATOS
+===================================================== */
+
+function obtenerDatos() {
+
+    return {
+
+        velocidad:
+            Math.max(
+                1,
+                Number(velocidadInput.value) || 28
+            ),
+
+        angulo:
+            Math.max(
+                1,
+                Math.min(
+                    89,
+                    Number(anguloInput.value) || 45
+                )
+            ),
+
+        altura:
+            Math.max(
+                0,
+                Number(alturaInput.value) || 2
+            ),
+
+        gravedad:
+            Math.max(
+                0.1,
+                Number(gravedadInput.value) || 9.81
+            ),
+
+        masa:
+            Math.max(
+                0.1,
+                Number(masaInput.value) || 1
+            )
+
+    };
+
+}
+
+
+/* =====================================================
+   COORDENADAS
+===================================================== */
+
+function convertirX(x) {
+
+    return 55 +
+        (x / mundo.ancho) *
+        (canvas.width - 85);
+
+}
+
+
+function convertirY(y) {
+
+    return canvas.height -
+        45 -
+        (y / mundo.alto) *
+        (canvas.height - 85);
+
+}
+
+
+function mundoX(px) {
+
+    return (
+        (px - 55) /
+        (canvas.width - 85)
+    ) * mundo.ancho;
+
+}
+
+
+function mundoY(py) {
+
+    return (
+        (canvas.height - 45 - py) /
+        (canvas.height - 85)
+    ) * mundo.alto;
+
+}
+
+
+/* =====================================================
+   CALCULOS TEORICOS
+===================================================== */
+
+function calcularTeoria() {
+
+    const d = obtenerDatos();
+
+    const rad =
+        d.angulo *
+        Math.PI / 180;
+
+
+    const vx =
+        d.velocidad *
+        Math.cos(rad);
+
+
+    const vy =
+        d.velocidad *
+        Math.sin(rad);
+
+
+    const tiempoMaximo =
+        vy / d.gravedad;
+
+
+    const alturaMaxima =
+        d.altura +
+        (vy * vy) /
+        (2 * d.gravedad);
+
+
+    const tiempoVuelo =
+        (
+            vy +
+            Math.sqrt(
+                vy * vy +
+                2 *
+                d.gravedad *
+                d.altura
+            )
+        ) /
+        d.gravedad;
+
+
+    const alcance =
+        vx *
+        tiempoVuelo;
+
+
+    mundo.ancho =
+        Math.max(
+            35,
+            alcance * 1.15
+        );
+
+
+    mundo.alto =
+        Math.max(
+            18,
+            alturaMaxima * 1.25
+        );
+
+
+    document.getElementById(
+        "tiempoMax"
+    ).textContent =
+        tiempoMaximo.toFixed(2) +
+        " s";
+
+
+    document.getElementById(
+        "alturaMax"
+    ).textContent =
+        alturaMaxima.toFixed(2) +
+        " m";
+
+
+    document.getElementById(
+        "tiempoVuelo"
+    ).textContent =
+        tiempoVuelo.toFixed(2) +
+        " s";
+
+
+    document.getElementById(
+        "alcance"
+    ).textContent =
+        alcance.toFixed(2) +
+        " m";
+
+
+    return {
+
+        vx,
+        vy,
+
+        tiempoMaximo,
+
+        alturaMaxima,
+
+        tiempoVuelo,
+
+        alcance
+
+    };
+
+}
+
+
+/* =====================================================
+   BLOQUES
+===================================================== */
+
+function crearBloques() {
+
+    bloques = [];
+
+
+    const cantidad =
+        Math.max(
+            1,
+            Math.min(
+                8,
+                Number(
+                    numBloquesInput.value
+                ) || 5
+            )
+        );
+
+
+    const teoria =
+        calcularTeoria();
+
+
+    const inicio =
+        teoria.alcance * 0.55;
+
+
+    for (
+        let i = 0;
+        i < cantidad;
+        i++
+    ) {
+
+        bloques.push({
+
+            x:
+                inicio +
+                i * 1.5,
+
+            y:
+                0.2 +
+                (i % 3) * 0.9,
+
+            ancho: 1,
+
+            alto: 0.8,
+
+            destruido: false
+
+        });
+
+    }
+
+}
+
+
+/* =====================================================
+   FONDO
+===================================================== */
+
+function dibujarFondo() {
+
+    ctx.fillStyle =
+        "#9bdcff";
+
+    ctx.fillRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    /* NUBES */
+
+    dibujarNube(150,80);
+
+    dibujarNube(600,110);
+
+    dibujarNube(820,70);
+
+
+    /* SUELO */
+
+    ctx.fillStyle =
+        "#67a83e";
+
+    ctx.fillRect(
+        0,
+        canvas.height - 45,
+        canvas.width,
+        45
+    );
+
+
+    ctx.fillStyle =
+        "#8b5a2b";
+
+    ctx.fillRect(
+        0,
+        canvas.height - 20,
+        canvas.width,
+        20
+    );
+
+
+    /* REJILLA */
+
+    ctx.strokeStyle =
+        "rgba(40,80,100,0.18)";
+
+    ctx.lineWidth = 1;
+
+
+    for (
+        let x = 0;
+        x <= mundo.ancho;
+        x += 5
+    ) {
+
+        const px =
+            convertirX(x);
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            px,
+            0
+        );
+
+        ctx.lineTo(
+            px,
+            canvas.height - 45
+        );
+
+        ctx.stroke();
+
+
+        ctx.fillStyle =
+            "#334155";
+
+        ctx.font =
+            "11px Arial";
+
+        ctx.fillText(
+            x + " m",
+            px - 10,
+            canvas.height - 27
+        );
+
+    }
+
+
+    for (
+        let y = 0;
+        y <= mundo.alto;
+        y += 5
+    ) {
+
+        const py =
+            convertirY(y);
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            55,
+            py
+        );
+
+        ctx.lineTo(
+            canvas.width,
+            py
+        );
+
+        ctx.stroke();
+
+
+        ctx.fillStyle =
+            "#334155";
+
+        ctx.fillText(
+            y + " m",
+            8,
+            py + 4
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   NUBES
+===================================================== */
+
+function dibujarNube(x,y) {
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.85)";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        22,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.arc(
+        x + 25,
+        y - 10,
+        28,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.arc(
+        x + 55,
+        y,
+        22,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+}
+
+
+/* =====================================================
+   PAJARO
+===================================================== */
+
+function dibujarPajaro(
+    x,
+    y,
+    angulo = 0
+) {
+
+    const px =
+        convertirX(x);
+
+    const py =
+        convertirY(y);
+
+
+    ctx.save();
+
+
+    ctx.translate(
+        px,
+        py
+    );
+
+
+    ctx.rotate(
+        -angulo
+    );
+
+
+    /* CUERPO */
+
+    ctx.fillStyle =
+        "#e53935";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        0,
+        0,
+        25,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* SOMBRA */
+
+    ctx.fillStyle =
+        "rgba(0,0,0,.15)";
+
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        0,
+        24,
+        18,
+        5,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* OJOS */
+
+    ctx.fillStyle =
+        "white";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -8,
+        -8,
+        8,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        9,
+        -8,
+        8,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* PUPILAS */
+
+    ctx.fillStyle =
+        "black";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        -6,
+        -7,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        11,
+        -7,
+        3,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    /* CEJAS */
+
+    ctx.strokeStyle =
+        "#111827";
+
+    ctx.lineWidth = 6;
+
+    ctx.lineCap = "round";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -16,
+        -18
+    );
+
+    ctx.lineTo(
+        -3,
+        -22
+    );
+
+    ctx.stroke();
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        2,
+        -22
+    );
+
+    ctx.lineTo(
+        17,
+        -18
+    );
+
+    ctx.stroke();
+
+
+    /* PICO */
+
+    ctx.fillStyle =
+        "#ffb300";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        21,
+        0
+    );
+
+    ctx.lineTo(
+        42,
+        7
+    );
+
+    ctx.lineTo(
+        21,
+        14
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    /* PLUMA */
+
+    ctx.fillStyle =
+        "#e53935";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        -8,
+        -22
+    );
+
+    ctx.lineTo(
+        -4,
+        -39
+    );
+
+    ctx.lineTo(
+        4,
+        -23
+    );
+
+    ctx.closePath();
+
+    ctx.fill();
+
+
+    ctx.restore();
+
+}
+
+
+/* =====================================================
+   RESORTERA
+===================================================== */
+
+function dibujarResortera() {
+
+    const x =
+        convertirX(0);
+
+    const suelo =
+        convertirY(0);
+
+
+    ctx.strokeStyle =
+        "#6b3e1e";
+
+    ctx.lineWidth = 9;
+
+    ctx.lineCap =
+        "round";
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x - 15,
+        suelo
+    );
+
+    ctx.lineTo(
+        x - 5,
+        suelo - 80
+    );
+
+    ctx.moveTo(
+        x + 15,
+        suelo
+    );
+
+    ctx.lineTo(
+        x + 5,
+        suelo - 80
+    );
+
+    ctx.stroke();
+
+
+    ctx.lineWidth = 6;
+
+    ctx.beginPath();
+
+    ctx.moveTo(
+        x - 25,
+        suelo
+    );
+
+    ctx.lineTo(
+        x + 25,
+        suelo
+    );
+
+    ctx.stroke();
+
+
+    /* BANDAS */
+
+    if (
+        !pajaro ||
+        !pajaro.volando
+    ) {
+
+        ctx.strokeStyle =
+            "#333";
+
+        ctx.lineWidth = 4;
+
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            x - 5,
+            suelo - 80
+        );
+
+        ctx.lineTo(
+            x,
+            convertirY(
+                obtenerDatos().altura
+            )
+        );
+
+        ctx.lineTo(
+            x + 5,
+            suelo - 80
+        );
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+/* =====================================================
+   BLOQUES
+===================================================== */
+
+function dibujarBloques() {
+
+    bloques.forEach(
+        bloque => {
+
+            if (
+                bloque.destruido
+            ) return;
+
+
+            const x =
+                convertirX(
+                    bloque.x
+                );
+
+
+            const y =
+                convertirY(
+                    bloque.y +
+                    bloque.alto
+                );
+
+
+            const ancho =
+                (
+                    bloque.ancho /
+                    mundo.ancho
+                ) *
+                (
+                    canvas.width - 85
+                );
+
+
+            const alto =
+                (
+                    bloque.alto /
+                    mundo.alto
+                ) *
+                (
+                    canvas.height - 85
+                );
+
+
+            ctx.fillStyle =
+                "#d59b5c";
+
+
+            ctx.fillRect(
+                x,
+                y,
+                ancho,
+                alto
+            );
+
+
+            ctx.strokeStyle =
+                "#75451f";
+
+            ctx.lineWidth = 3;
+
+
+            ctx.strokeRect(
+                x,
+                y,
+                ancho,
+                alto
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   RASTROS
+===================================================== */
+
+function dibujarRastros() {
+
+    rastros.forEach(
+        (rastro,index) => {
+
+            if (
+                rastro.length < 2
+            ) return;
+
+
+            ctx.strokeStyle =
+                index % 2 === 0
+                    ? "#e53935"
+                    : "#7c3aed";
+
+
+            ctx.lineWidth = 3;
+
+
+            ctx.beginPath();
+
+
+            rastro.forEach(
+                (p,i) => {
+
+                    const x =
+                        convertirX(
+                            p.x
+                        );
+
+
+                    const y =
+                        convertirY(
+                            p.y
+                        );
+
+
+                    if (
+                        i === 0
+                    ) {
+
+                        ctx.moveTo(
+                            x,
+                            y
+                        );
+
+                    } else {
+
+                        ctx.lineTo(
+                            x,
+                            y
+                        );
+
+                    }
+
+                }
+            );
+
+
+            ctx.stroke();
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   DIBUJAR TODO
+===================================================== */
+
+function dibujar() {
+
+    dibujarFondo();
+
+    dibujarRastros();
+
+    dibujarBloques();
+
+    dibujarResortera();
+
+
+    if (
+        pajaro
+    ) {
+
+        if (
+            pajaro.volando
+        ) {
+
+            dibujarPajaro(
+                pajaro.x,
+                pajaro.y,
+                Math.atan2(
+                    pajaro.vy,
+                    pajaro.vx
+                )
+            );
+
+        } else {
+
+            dibujarPajaro(
+                0,
+                pajaro.y,
+                0
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =====================================================
+   DATOS EN TIEMPO REAL
+===================================================== */
+
+function actualizarDatos() {
+
+    if (!pajaro)
+        return;
+
+
+    const velocidad =
+        Math.sqrt(
+            pajaro.vx *
+            pajaro.vx +
+            pajaro.vy *
+            pajaro.vy
+        );
+
+
+    document.getElementById(
+        "tiempo"
+    ).textContent =
+        pajaro.t.toFixed(2) +
+        " s";
+
+
+    document.getElementById(
+        "posX"
+    ).textContent =
+        pajaro.x.toFixed(2) +
+        " m";
+
+
+    document.getElementById(
+        "posY"
+    ).textContent =
+        Math.max(
+            0,
+            pajaro.y
+        ).toFixed(2) +
+        " m";
+
+
+    document.getElementById(
+        "vx"
+    ).textContent =
+        pajaro.vx.toFixed(2) +
+        " m/s";
+
+
+    document.getElementById(
+        "vy"
+    ).textContent =
+        pajaro.vy.toFixed(2) +
+        " m/s";
+
+
+    document.getElementById(
+        "velActual"
+    ).textContent =
+        velocidad.toFixed(2) +
+        " m/s";
+
+}
+
+
+/* =====================================================
+   LANZAMIENTO
+===================================================== */
+
+function lanzar(
+    vxPersonalizado = null,
+    vyPersonalizado = null
+) {
+
+    if (
+        pajaro &&
+        pajaro.volando
+    ) return;
+
+
+    const d =
+        obtenerDatos();
+
+
+    let vx;
+    let vy;
+
+
+    if (
+        vxPersonalizado !== null
+    ) {
+
+        vx =
+            vxPersonalizado;
+
+        vy =
+            vyPersonalizado;
+
+
+        d.velocidad =
+            Math.sqrt(
+                vx * vx +
+                vy * vy
+            );
+
+
+        d.angulo =
+            Math.atan2(
+                vy,
+                vx
+            ) *
+            180 /
+            Math.PI;
+
+
+        velocidadInput.value =
+            d.velocidad.toFixed(1);
+
+
+        anguloInput.value =
+            d.angulo.toFixed(1);
+
+    } else {
+
+        const rad =
+            d.angulo *
+            Math.PI /
+            180;
+
+
+        vx =
+            d.velocidad *
+            Math.cos(rad);
+
+
+        vy =
+            d.velocidad *
+            Math.sin(rad);
+
+    }
+
+
+    calcularTeoria();
+
+
+    pajaro = {
+
+        x: 0,
+
+        y: d.altura,
+
+        vx: vx,
+
+        vy: vy,
+
+        t: 0,
+
+        volando: true,
+
+        rastro: []
+
+    };
+
+
+    rastros.push(
+        pajaro.rastro
+    );
+
+
+    estado.textContent =
+        "🐦 ¡Lanzamiento!";
+
+
+    let anterior =
+        performance.now();
+
+
+    function animar(ahora) {
+
+        const delta =
+            Math.min(
+                (ahora -
+                anterior) /
+                1000,
+                .035
+            );
+
+
+        anterior =
+            ahora;
+
+
+        pajaro.t += delta;
+
+
+        pajaro.x =
+            vx *
+            pajaro.t;
+
+
+        pajaro.y =
+            d.altura +
+            vy *
+            pajaro.t -
+            .5 *
+            d.gravedad *
+            pajaro.t *
+            pajaro.t;
+
+
+        pajaro.vy =
+            vy -
+            d.gravedad *
+            pajaro.t;
+
+
+        pajaro.rastro.push({
+
+            x:
+                pajaro.x,
+
+            y:
+                Math.max(
+                    0,
+                    pajaro.y
+                )
+
+        });
+
+
+        detectarColisiones();
+
+        actualizarDatos();
+
+        dibujar();
+
+
+        if (
+            pajaro.y <= 0 ||
+            pajaro.x >
+            mundo.ancho
+        ) {
+
+            terminarTiro();
+
+            return;
+
+        }
+
+
+        animacion =
+            requestAnimationFrame(
+                animar
+            );
+
+    }
+
+
+    animacion =
+        requestAnimationFrame(
+            animar
+        );
+
+}
+
+
+/* =====================================================
+   COLISIONES
+===================================================== */
+
+function detectarColisiones() {
+
+    if (!pajaro)
+        return;
+
+
+    bloques.forEach(
+        bloque => {
+
+            if (
+                bloque.destruido
+            ) return;
+
+
+            const dx =
+                Math.abs(
+                    pajaro.x -
+                    (
+                        bloque.x +
+                        bloque.ancho / 2
+                    )
+                );
+
+
+            const dy =
+                Math.abs(
+                    pajaro.y -
+                    (
+                        bloque.y +
+                        bloque.alto / 2
+                    )
+                );
+
+
+            if (
+                dx <
+                bloque.ancho / 2 +
+                .5 &&
+
+                dy <
+                bloque.alto / 2 +
+                .5
+            ) {
+
+                bloque.destruido =
+                    true;
+
+
+                estado.textContent =
+                    "💥 ¡BLOQUE DERRIBADO!";
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   TERMINAR
+===================================================== */
+
+function terminarTiro() {
+
+    cancelAnimationFrame(
+        animacion
+    );
+
+
+    pajaro.volando =
+        false;
+
+
+    const teoria =
+        calcularTeoria();
+
+
+    const d =
+        obtenerDatos();
+
+
+    historial.push({
+
+        velocidad:
+            d.velocidad,
+
+        angulo:
+            d.angulo,
+
+        alcance:
+            pajaro.x,
+
+        altura:
+            teoria.alturaMaxima,
+
+        bloques:
+            bloques.filter(
+                b =>
+                    b.destruido
+            ).length
+
+    });
+
+
+    actualizarHistorial();
+
+
+    estado.textContent =
+        "🐦 ¡El pájaro regresó!";
+
+
+    dibujar();
+
+}
+
+
+/* =====================================================
+   HISTORIAL
+===================================================== */
+
+function actualizarHistorial() {
+
+    const contenedor =
+        document.getElementById(
+            "historial"
+        );
+
+
+    contenedor.innerHTML = "";
+
+
+    historial.forEach(
+        (tiro,index) => {
+
+            const div =
+                document.createElement(
+                    "div"
+                );
+
+
+            div.className =
+                "tiro";
+
+
+            div.innerHTML = `
+
+                <strong>
+                    🐦 Tiro ${index + 1}
+                </strong>
+
+                <br>
+
+                Velocidad:
+                ${tiro.velocidad.toFixed(2)}
+                m/s
+
+                <br>
+
+                Ángulo:
+                ${tiro.angulo.toFixed(2)}°
+
+                <br>
+
+                Alcance:
+                ${tiro.alcance.toFixed(2)}
+                m
+
+                <br>
+
+                Altura máxima:
+                ${tiro.altura.toFixed(2)}
+                m
+
+                <br>
+
+                Bloques derribados:
+                ${tiro.bloques}
+
+            `;
+
+
+            contenedor.appendChild(
+                div
+            );
+
+        }
+    );
+
+}
+
+
+/* =====================================================
+   NUEVO PAJARO
+===================================================== */
+
+function nuevoPajaro() {
+
+    cancelAnimationFrame(
+        animacion
+    );
+
+
+    crearBloques();
+
+
+    pajaro = {
+
+        x: 0,
+
+        y:
+            obtenerDatos().altura,
+
+        vx: 0,
+
+        vy: 0,
+
+        t: 0,
+
+        volando: false,
+
+        rastro: []
+
+    };
+
+
+    estado.textContent =
+        "🐦 ¡Arrastra el pájaro hacia atrás!";
+
+
+    actualizarDatos();
+
+    dibujar();
+
+}
+
+
+/* =====================================================
+   MOUSE
+===================================================== */
+
+canvas.addEventListener(
+    "mousedown",
+    e => {
+
+        if (
+            !pajaro ||
+            pajaro.volando
+        ) return;
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const mouseX =
+            e.clientX -
+            rect.left;
+
+
+        const mouseY =
+            e.clientY -
+            rect.top;
+
+
+        const px =
+            convertirX(
+                pajaro.x
+            );
+
+
+        const py =
+            convertirY(
+                pajaro.y
+            );
+
+
+        const distancia =
+            Math.hypot(
+                mouseX - px,
+                mouseY - py
+            );
+
+
+        /* Solo permite agarrar
+           el pájaro */
+
+        if (
+            distancia < 45
+        ) {
+
+            arrastrando =
+                true;
+
+            canvas.setPointerCapture(
+                e.pointerId
+            );
+
+            estado.textContent =
+                "🎯 ¡Apunta y estira la resortera!";
+
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MOVIMIENTO DEL MOUSE
+===================================================== */
+
+canvas.addEventListener(
+    "mousemove",
+    e => {
+
+        if (
+            !arrastrando
+        ) return;
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const mouseX =
+            e.clientX -
+            rect.left;
+
+
+        const mouseY =
+            e.clientY -
+            rect.top;
+
+
+        let x =
+            mundoX(
+                mouseX
+            );
+
+
+        let y =
+            mundoY(
+                mouseY
+            );
+
+
+        /* Limitar el estiramiento */
+
+        x =
+            Math.min(
+                3,
+                Math.max(
+                    -5,
+                    x
+                )
+            );
+
+
+        y =
+            Math.min(
+                12,
+                Math.max(
+                    0,
+                    y
+                )
+            );
+
+
+        pajaro.x =
+            x;
+
+        pajaro.y =
+            y;
+
+
+        dibujar();
+
+    }
+);
+
+
+/* =====================================================
+   SOLTAR MOUSE
+===================================================== */
+
+canvas.addEventListener(
+    "mouseup",
+    e => {
+
+        if (
+            !arrastrando
+        ) return;
+
+
+        arrastrando =
+            false;
+
+
+        const d =
+            obtenerDatos();
+
+
+        /* Punto de reposo */
+
+        const reposoX = 0;
+
+        const reposoY =
+            d.altura;
+
+
+        /* Diferencia */
+
+        const dx =
+            reposoX -
+            pajaro.x;
+
+
+        const dy =
+            reposoY -
+            pajaro.y;
+
+
+        const distancia =
+            Math.sqrt(
+                dx * dx +
+                dy * dy
+            );
+
+
+        /* Factor de potencia */
+
+        const potencia =
+            4.5;
+
+
+        let vx =
+            dx *
+            potencia;
+
+
+        let vy =
+            dy *
+            potencia;
+
+
+        /* Limitar velocidad */
+
+        const velocidadMaxima =
+            80;
+
+
+        const velocidad =
+            Math.sqrt(
+                vx * vx +
+                vy * vy
+            );
+
+
+        if (
+            velocidad >
+            velocidadMaxima
+        ) {
+
+            vx =
+                vx /
+                velocidad *
+                velocidadMaxima;
+
+
+            vy =
+                vy /
+                velocidad *
+                velocidadMaxima;
+
+        }
+
+
+        pajaro.x = 0;
+
+        pajaro.y = reposoY;
+
+
+        lanzar(
+            vx,
+            vy
+        );
+
+    }
+);
+
+
+/* =====================================================
+   SOPORTE TOUCH / POINTER
+===================================================== */
+
+canvas.addEventListener(
+    "pointerdown",
+    e => {
+
+        if (
+            e.pointerType ===
+            "touch"
+        ) {
+
+            const rect =
+                canvas.getBoundingClientRect();
+
+
+            const mx =
+                e.clientX -
+                rect.left;
+
+
+            const my =
+                e.clientY -
+                rect.top;
+
+
+            const px =
+                convertirX(0);
+
+
+            const py =
+                convertirY(
+                    obtenerDatos().altura
+                );
+
+
+            if (
+                Math.hypot(
+                    mx - px,
+                    my - py
+                ) < 50
+            ) {
+
+                arrastrando =
+                    true;
+
+                canvas.setPointerCapture(
+                    e.pointerId
+                );
+
+            }
+
+        }
+
+    }
+);
+
+
+canvas.addEventListener(
+    "pointermove",
+    e => {
+
+        if (
+            !arrastrando ||
+            e.pointerType !==
+            "touch"
+        ) return;
+
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        const x =
+            Math.min(
+                3,
+                Math.max(
+                    -5,
+                    mundoX(
+                        e.clientX -
+                        rect.left
+                    )
+                )
+            );
+
+
+        const y =
+            Math.min(
+                12,
+                Math.max(
+                    0,
+                    mundoY(
+                        e.clientY -
+                        rect.top
+                    )
+                )
+            );
+
+
+        pajaro.x =
+            x;
+
+        pajaro.y =
+            y;
+
+
+        dibujar();
+
+    }
+);
+
+
+canvas.addEventListener(
+    "pointerup",
+    e => {
+
+        if (
+            !arrastrando
+        ) return;
+
+
+        arrastrando =
+            false;
+
+
+        if (
+            e.pointerType !==
+            "touch"
+        ) return;
+
+
+        const d =
+            obtenerDatos();
+
+
+        const dx =
+            -pajaro.x;
+
+
+        const dy =
+            d.altura -
+            pajaro.y;
+
+
+        let vx =
+            dx * 4.5;
+
+
+        let vy =
+            dy * 4.5;
+
+
+        const velocidad =
+            Math.sqrt(
+                vx * vx +
+                vy * vy
+            );
+
+
+        if (
+            velocidad > 80
+        ) {
+
+            vx =
+                vx /
+                velocidad *
+                80;
+
+
+            vy =
+                vy /
+                velocidad *
+                80;
+
+        }
+
+
+        pajaro.x = 0;
+
+        pajaro.y =
+            d.altura;
+
+
+        lanzar(
+            vx,
+            vy
+        );
+
+    }
+);
+
+
+/* =====================================================
+   BOTONES
+===================================================== */
+
+document
+    .getElementById(
+        "btnLanzar"
+    )
+    .addEventListener(
+        "click",
+        () => lanzar()
+    );
+
+
+document
+    .getElementById(
+        "btnReiniciar"
+    )
+    .addEventListener(
+        "click",
+        nuevoPajaro
+    );
+
+
+document
+    .getElementById(
+        "btnRastro"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            rastros = [];
+
+            dibujar();
+
+        }
+    );
+
+
+/* =====================================================
+   MUSICA ORIGINAL DE FONDO
+===================================================== */
+
+let audioContext = null;
+
+let musicaActiva = false;
+
+let intervaloMusica = null;
+
+
+function iniciarMusica() {
+
+    if (
+        musicaActiva
+    ) return;
+
+
+    audioContext =
+        new (
+            window.AudioContext ||
+            window.webkitAudioContext
+        )();
+
+
+    musicaActiva =
+        true;
+
+
+    const notas = [
+
+        261.63,
+        329.63,
+        392.00,
+        329.63,
+        293.66,
+        349.23,
+        440.00,
+        349.23
+
+    ];
+
+
+    let indice = 0;
+
+
+    function tocarNota() {
+
+        if (
+            !musicaActiva
+        ) return;
+
+
+        const oscillator =
+            audioContext.createOscillator();
+
+
+        const gain =
+            audioContext.createGain();
+
+
+        oscillator.type =
+            "sine";
+
+
+        oscillator.frequency.value =
+            notas[indice];
+
+
+        /* Volumen muy bajo */
+
+        gain.gain.setValueAtTime(
+            0.025,
+            audioContext.currentTime
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            audioContext.currentTime + 0.55
+        );
+
+
+        oscillator.connect(gain);
+
+        gain.connect(
+            audioContext.destination
+        );
+
+
+        oscillator.start();
+
+        oscillator.stop(
+            audioContext.currentTime +
+            0.55
+        );
+
+
+        indice =
+            (indice + 1) %
+            notas.length;
+
+    }
+
+
+    tocarNota();
+
+
+    intervaloMusica =
+        setInterval(
+            tocarNota,
+            650
+        );
+
+
+    document.getElementById(
+        "btnMusica"
+    ).textContent =
+        "🔊 Música: ON";
+
+}
+
+
+function detenerMusica() {
+
+    musicaActiva =
+        false;
+
+
+    clearInterval(
+        intervaloMusica
+    );
+
+
+    intervaloMusica =
+        null;
+
+
+    if (
+        audioContext
+    ) {
+
+        audioContext.close();
+
+        audioContext =
+            null;
+
+    }
+
+
+    document.getElementById(
+        "btnMusica"
+    ).textContent =
+        "🔇 Música: OFF";
+
+}
+
+
+document
+    .getElementById(
+        "btnMusica"
+    )
+    .addEventListener(
+        "click",
+        () => {
+
+            if (
+                musicaActiva
+            ) {
+
+                detenerMusica();
+
+            } else {
+
+                iniciarMusica();
+
+            }
+
+        }
+    );
+
+
+/* =====================================================
+   ACTUALIZAR PARAMETROS
+===================================================== */
+
+[
+    velocidadInput,
+    anguloInput,
+    alturaInput,
+    gravedadInput,
+    masaInput,
+    numBloquesInput
+
+].forEach(
+    input => {
+
+        input.addEventListener(
+            "input",
+            () => {
+
+                if (
+                    !pajaro ||
+                    !pajaro.volando
+                ) {
+
+                    calcularTeoria();
+
+                    crearBloques();
+
+                    nuevoPajaro();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =====================================================
+   INICIAR
+===================================================== */
+
+calcularTeoria();
+
+crearBloques();
+
+nuevoPajaro();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1806 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Cinemática</title>
+<h1> Santes Ochoa Miguel Angel </h1>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            color: #172554;
+        }
+
+        /* =========================
+           CINTILLO DE TEORÍA
+        ========================== */
+
+        .cintillo {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 30px 6%;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .cintillo h1 {
+            text-align: center;
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .cintillo > p {
+            text-align: center;
+            max-width: 900px;
+            margin: auto;
+            line-height: 1.6;
+            font-size: 17px;
+        }
+
+        .teoria {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .tarjeta-teoria {
+            background: rgba(255,255,255,0.15);
+            padding: 18px;
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.25);
+        }
+
+        .tarjeta-teoria h3 {
+            margin-bottom: 8px;
+        }
+
+        .tarjeta-teoria p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* =========================
+           CONTENEDOR
+        ========================== */
+
+        .contenedor {
+            width: 92%;
+            max-width: 1200px;
+            margin: 30px auto;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .panel h2 {
+            color: #1e3a8a;
+            margin-bottom: 20px;
+        }
+
+        /* =========================
+           CONFIGURACIÓN
+        ========================== */
+
+        .controles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .campo {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .campo label {
+            font-weight: bold;
+            margin-bottom: 7px;
+            color: #334155;
+        }
+
+        .campo input,
+        .campo select {
+            padding: 11px;
+            border: 2px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .campo input:focus,
+        .campo select:focus {
+            border-color: #2563eb;
+        }
+
+        .botones {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        button {
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-iniciar {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-pausar {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .btn-reiniciar {
+            background: #dc2626;
+            color: white;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            opacity: 0.9;
+        }
+
+        /* =========================
+           PISTA
+        ========================== */
+
+        .pista {
+            position: relative;
+            height: 360px;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 4px solid #334155;
+
+            background: linear-gradient(
+                to bottom,
+                #dbeafe 0%,
+                #eff6ff 55%,
+                #e2e8f0 55%,
+                #e2e8f0 100%
+            );
+        }
+
+        .etiqueta-pista {
+            position: absolute;
+            top: 20px;
+            left: 25px;
+            background: white;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: #172554;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            z-index: 15;
+        }
+
+        /* Regla */
+
+        .regla {
+            position: absolute;
+            left: 5%;
+            right: 5%;
+            bottom: 105px;
+            height: 15px;
+            background: #64748b;
+            border-radius: 8px;
+        }
+
+        .marca {
+            position: absolute;
+            bottom: 85px;
+            width: 2px;
+            height: 55px;
+            background: #334155;
+        }
+
+        .numero {
+            position: absolute;
+            bottom: 48px;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: #334155;
+        }
+
+        .m0 { left: 5%; }
+        .m1 { left: 15%; }
+        .m2 { left: 25%; }
+        .m3 { left: 35%; }
+        .m4 { left: 45%; }
+        .m5 { left: 55%; }
+        .m6 { left: 65%; }
+        .m7 { left: 75%; }
+        .m8 { left: 85%; }
+        .m9 { left: 95%; }
+
+        /* =========================
+           PELOTA
+        ========================== */
+
+        .pelota {
+            position: absolute;
+
+            width: 55px;
+            height: 55px;
+
+            background: radial-gradient(
+                circle at 35% 30%,
+                #ffffff 0%,
+                #bfdbfe 25%,
+                #2563eb 70%,
+                #1e3a8a 100%
+            );
+
+            border-radius: 50%;
+
+            bottom: 112px;
+            left: 5%;
+
+            transform: translateX(-50%);
+
+            z-index: 5;
+
+            box-shadow: 0 8px 12px rgba(0,0,0,0.25);
+
+            transition: left 0.1s linear;
+        }
+
+        /* Sombra de la pelota */
+
+        .sombra {
+            position: absolute;
+
+            width: 65px;
+            height: 12px;
+
+            background: rgba(0,0,0,0.2);
+
+            border-radius: 50%;
+
+            bottom: 103px;
+            left: 5%;
+
+            transform: translateX(-50%);
+
+            transition: left 0.1s linear;
+        }
+
+        /* =========================
+           VECTOR DE VELOCIDAD
+        ========================== */
+
+        .vector {
+            position: absolute;
+
+            height: 5px;
+            width: 0;
+
+            background: #dc2626;
+
+            bottom: 165px;
+            left: 5%;
+
+            z-index: 8;
+
+            transition:
+                width 0.15s linear,
+                left 0.1s linear;
+        }
+
+        .vector::after {
+            content: "";
+
+            position: absolute;
+
+            right: -2px;
+            top: -7px;
+
+            border-top: 9px solid transparent;
+            border-bottom: 9px solid transparent;
+            border-left: 15px solid #dc2626;
+        }
+
+        /* Texto de velocidad */
+
+        .vector-texto {
+            position: absolute;
+
+            bottom: 195px;
+            left: 5%;
+
+            color: #dc2626;
+
+            background: rgba(255,255,255,0.95);
+
+            padding: 6px 10px;
+
+            border-radius: 6px;
+
+            font-weight: bold;
+            font-size: 14px;
+
+            transform: translateX(-50%);
+
+            white-space: nowrap;
+
+            z-index: 20;
+
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+
+            transition: left 0.1s linear;
+        }
+
+        /* =========================
+           DATOS EN TIEMPO REAL
+        ========================== */
+
+        .datos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 15px;
+        }
+
+        .dato {
+            background: #eff6ff;
+            border-left: 5px solid #2563eb;
+            padding: 18px;
+            border-radius: 10px;
+        }
+
+        .dato h3 {
+            font-size: 14px;
+            color: #475569;
+            margin-bottom: 7px;
+        }
+
+        .dato p {
+            font-size: 25px;
+            font-weight: bold;
+            color: #1e3a8a;
+        }
+
+        /* =========================
+           GRÁFICA
+        ========================== */
+
+        #grafica {
+            width: 100%;
+            height: 350px;
+            border: 2px solid #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        /* =========================
+           CALCULADORA
+        ========================== */
+
+        .calculadora {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            background: #dbeafe;
+            padding: 18px;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #1e3a8a;
+            text-align: center;
+        }
+
+        /* =========================
+           FÓRMULAS
+        ========================== */
+
+        .formulas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 15px;
+        }
+
+        .formula {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .formula h3 {
+            color: #334155;
+            margin-bottom: 12px;
+        }
+
+        .formula p {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        /* =========================
+           CONCEPTOS
+        ========================== */
+
+        .conceptos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+        }
+
+        .concepto {
+            padding: 18px;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .concepto h3 {
+            color: #1e3a8a;
+            margin-bottom: 8px;
+        }
+
+        .concepto p {
+            line-height: 1.5;
+            color: #475569;
+        }
+
+        /* =========================
+           RESPONSIVE
+        ========================== */
+
+        @media (max-width: 700px) {
+
+            .cintillo h1 {
+                font-size: 28px;
+            }
+
+            .pista {
+                height: 320px;
+            }
+
+            .vector-texto {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         CINTILLO
+    ========================== -->
+
+    <header class="cintillo">
+
+        <h1>🔬 Simulador de Cinemática</h1>
+
+        <p>
+            La cinemática es la rama de la física que estudia el movimiento
+            de los cuerpos sin analizar las causas que lo producen.
+        </p>
+
+        <div class="teoria">
+
+            <div class="tarjeta-teoria">
+                <h3>📖 ¿Qué es?</h3>
+                <p>
+                    Estudia la posición, desplazamiento, velocidad,
+                    aceleración y tiempo de un objeto en movimiento.
+                </p>
+            </div>
+
+            <div class="tarjeta-teoria">
+                <h3>🎯 ¿Para qué sirve?</h3>
+                <p>
+                    Permite describir y predecir cómo se mueve un objeto
+                    utilizando ecuaciones matemáticas.
+                </p>
+            </div>
+
+            <div class="tarjeta-teoria">
+                <h3>🟢 MRU</h3>
+                <p>
+                    Movimiento con velocidad constante y aceleración igual
+                    a cero.
+                    <br><br>
+                    <strong>v = d / t</strong>
+                </p>
+            </div>
+
+            <div class="tarjeta-teoria">
+                <h3>🟠 MRUA</h3>
+                <p>
+                    Movimiento en el que la velocidad cambia de manera
+                    constante debido a una aceleración.
+                    <br><br>
+                    <strong>v = v₀ + at</strong>
+                </p>
+            </div>
+
+        </div>
+
+    </header>
+
+
+    <main class="contenedor">
+
+        <!-- =========================
+             CONFIGURACIÓN
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>⚙️ Configuración del movimiento</h2>
+
+            <div class="controles">
+
+                <div class="campo">
+                    <label>Tipo de movimiento</label>
+
+                    <select id="tipo">
+
+                        <option value="MRU">
+                            Movimiento Rectilíneo Uniforme (MRU)
+                        </option>
+
+                        <option value="MRUA">
+                            Movimiento Rectilíneo Uniformemente Acelerado (MRUA)
+                        </option>
+
+                    </select>
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Velocidad inicial (m/s)</label>
+
+                    <input
+                        type="number"
+                        id="velocidad"
+                        value="10"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Aceleración (m/s²)</label>
+
+                    <input
+                        type="number"
+                        id="aceleracion"
+                        value="0"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Posición inicial (m)</label>
+
+                    <input
+                        type="number"
+                        id="posicionInicial"
+                        value="0"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Tiempo máximo (s)</label>
+
+                    <input
+                        type="number"
+                        id="tiempoMax"
+                        value="10"
+                        min="1"
+                        step="0.5"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="botones">
+
+                <button
+                    class="btn-iniciar"
+                    onclick="iniciar()"
+                >
+                    ▶ Iniciar
+                </button>
+
+                <button
+                    class="btn-pausar"
+                    onclick="pausar()"
+                >
+                    ⏸ Pausar
+                </button>
+
+                <button
+                    class="btn-reiniciar"
+                    onclick="reiniciar()"
+                >
+                    🔄 Reiniciar
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SIMULACIÓN
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>🔬 Simulación de la pelota</h2>
+
+            <div class="pista">
+
+                <div class="etiqueta-pista">
+                    🧪 Pelota sobre pista de laboratorio
+                </div>
+
+
+                <!-- Regla -->
+
+                <div class="regla"></div>
+
+
+                <!-- Marcas -->
+
+                <div class="marca m0"></div>
+                <div class="marca m1"></div>
+                <div class="marca m2"></div>
+                <div class="marca m3"></div>
+                <div class="marca m4"></div>
+                <div class="marca m5"></div>
+                <div class="marca m6"></div>
+                <div class="marca m7"></div>
+                <div class="marca m8"></div>
+                <div class="marca m9"></div>
+
+
+                <!-- Números -->
+
+                <div class="numero m0">0 m</div>
+                <div class="numero m1">10 m</div>
+                <div class="numero m2">20 m</div>
+                <div class="numero m3">30 m</div>
+                <div class="numero m4">40 m</div>
+                <div class="numero m5">50 m</div>
+                <div class="numero m6">60 m</div>
+                <div class="numero m7">70 m</div>
+                <div class="numero m8">80 m</div>
+                <div class="numero m9">90 m</div>
+
+
+                <!-- Sombra -->
+
+                <div
+                    class="sombra"
+                    id="sombra"
+                ></div>
+
+
+                <!-- Pelota -->
+
+                <div
+                    class="pelota"
+                    id="pelota"
+                ></div>
+
+
+                <!-- Vector -->
+
+                <div
+                    class="vector"
+                    id="vector"
+                ></div>
+
+
+                <!-- Texto del vector -->
+
+                <div
+                    class="vector-texto"
+                    id="vectorTexto"
+                >
+                    v = 0.0 m/s
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             DATOS EN TIEMPO REAL
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>📊 Datos en tiempo real</h2>
+
+            <div class="datos">
+
+                <div class="dato">
+                    <h3>⏱ Tiempo</h3>
+                    <p id="tiempo">0.0 s</p>
+                </div>
+
+                <div class="dato">
+                    <h3>📍 Posición</h3>
+                    <p id="posicion">0.0 m</p>
+                </div>
+
+                <div class="dato">
+                    <h3>📏 Distancia</h3>
+                    <p id="distancia">0.0 m</p>
+                </div>
+
+                <div class="dato">
+                    <h3>🚀 Velocidad</h3>
+                    <p id="velocidadActual">0.0 m/s</p>
+                </div>
+
+                <div class="dato">
+                    <h3>⚡ Aceleración</h3>
+                    <p id="aceleracionActual">0.0 m/s²</p>
+                </div>
+
+                <div class="dato">
+                    <h3>↔ Desplazamiento</h3>
+                    <p id="desplazamiento">0.0 m</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             GRÁFICA
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>📈 Gráfica posición - tiempo</h2>
+
+            <canvas id="grafica"></canvas>
+
+        </section>
+
+
+        <!-- =========================
+             CALCULADORA
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>🧮 Calculadora de Cinemática</h2>
+
+            <div class="calculadora">
+
+                <div class="campo">
+
+                    <label>¿Qué deseas calcular?</label>
+
+                    <select id="calculo">
+
+                        <option value="distancia">
+                            Distancia
+                        </option>
+
+                        <option value="velocidad">
+                            Velocidad
+                        </option>
+
+                        <option value="tiempo">
+                            Tiempo
+                        </option>
+
+                        <option value="aceleracion">
+                            Aceleración
+                        </option>
+
+                        <option value="velocidadFinal">
+                            Velocidad final
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Distancia (m)</label>
+
+                    <input
+                        type="number"
+                        id="cDistancia"
+                        value="20"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Velocidad (m/s)</label>
+
+                    <input
+                        type="number"
+                        id="cVelocidad"
+                        value="5"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Tiempo (s)</label>
+
+                    <input
+                        type="number"
+                        id="cTiempo"
+                        value="4"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Velocidad inicial (m/s)</label>
+
+                    <input
+                        type="number"
+                        id="cVelocidadInicial"
+                        value="5"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Aceleración (m/s²)</label>
+
+                    <input
+                        type="number"
+                        id="cAceleracion"
+                        value="2"
+                        step="0.1"
+                    >
+
+                </div>
+
+
+                <div class="campo">
+
+                    <label>Velocidad final (m/s)</label>
+
+                    <input
+                        type="number"
+                        id="cVelocidadFinal"
+                        value="13"
+                        step="0.1"
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="botones">
+
+                <button
+                    class="btn-iniciar"
+                    onclick="calcular()"
+                >
+                    🧮 Calcular
+                </button>
+
+            </div>
+
+
+            <div
+                class="resultado"
+                id="resultado"
+            >
+                Resultado: --
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             FÓRMULAS
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>📚 Fórmulas básicas de cinemática</h2>
+
+            <div class="formulas">
+
+                <div class="formula">
+
+                    <h3>Velocidad</h3>
+
+                    <p>v = Δx / Δt</p>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <h3>Distancia en MRU</h3>
+
+                    <p>d = v × t</p>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <h3>Aceleración</h3>
+
+                    <p>a = (vf - vi) / t</p>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <h3>Velocidad final</h3>
+
+                    <p>vf = vi + at</p>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <h3>Posición en MRUA</h3>
+
+                    <p>x = x₀ + v₀t + ½at²</p>
+
+                </div>
+
+
+                <div class="formula">
+
+                    <h3>MRU</h3>
+
+                    <p>a = 0</p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             CONCEPTOS
+        ========================== -->
+
+        <section class="panel">
+
+            <h2>📖 Conceptos importantes</h2>
+
+            <div class="conceptos">
+
+                <div class="concepto">
+
+                    <h3>📍 Posición</h3>
+
+                    <p>
+                        Es la ubicación de un objeto respecto a un punto
+                        de referencia.
+                    </p>
+
+                </div>
+
+
+                <div class="concepto">
+
+                    <h3>📏 Distancia</h3>
+
+                    <p>
+                        Es la longitud total del recorrido realizado
+                        por un objeto.
+                    </p>
+
+                </div>
+
+
+                <div class="concepto">
+
+                    <h3>↔ Desplazamiento</h3>
+
+                    <p>
+                        Es el cambio de posición entre el punto inicial
+                        y el punto final.
+                    </p>
+
+                </div>
+
+
+                <div class="concepto">
+
+                    <h3>🚀 Velocidad</h3>
+
+                    <p>
+                        Indica qué tan rápido cambia la posición de
+                        un objeto y en qué dirección.
+                    </p>
+
+                </div>
+
+
+                <div class="concepto">
+
+                    <h3>⚡ Aceleración</h3>
+
+                    <p>
+                        Representa el cambio de la velocidad respecto
+                        al tiempo.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script>
+
+        /* =========================
+           VARIABLES
+        ========================== */
+
+        let tiempo = 0;
+
+        let intervalo = null;
+
+        let ejecutando = false;
+
+        let posiciones = [];
+
+        let tiempos = [];
+
+
+        /* =========================
+           INICIAR SIMULACIÓN
+        ========================== */
+
+        function iniciar() {
+
+            if (ejecutando) return;
+
+            ejecutando = true;
+
+            intervalo = setInterval(() => {
+
+                const tipo =
+                    document.getElementById("tipo").value;
+
+                const v0 =
+                    parseFloat(
+                        document.getElementById("velocidad").value
+                    ) || 0;
+
+                let a =
+                    parseFloat(
+                        document.getElementById("aceleracion").value
+                    ) || 0;
+
+                const x0 =
+                    parseFloat(
+                        document.getElementById("posicionInicial").value
+                    ) || 0;
+
+                const tiempoMax =
+                    parseFloat(
+                        document.getElementById("tiempoMax").value
+                    ) || 10;
+
+
+                /* MRU */
+
+                if (tipo === "MRU") {
+
+                    a = 0;
+
+                }
+
+
+                tiempo += 0.1;
+
+
+                let posicion;
+
+                let velocidadActual;
+
+
+                /* =========================
+                   ECUACIONES
+                ========================== */
+
+                if (tipo === "MRU") {
+
+                    posicion =
+                        x0 + v0 * tiempo;
+
+                    velocidadActual = v0;
+
+                }
+
+                else {
+
+                    posicion =
+                        x0 +
+                        v0 * tiempo +
+                        0.5 * a * tiempo * tiempo;
+
+                    velocidadActual =
+                        v0 + a * tiempo;
+
+                }
+
+
+                const desplazamiento =
+                    posicion - x0;
+
+                const distancia =
+                    Math.abs(desplazamiento);
+
+
+                /* =========================
+                   ACTUALIZAR DATOS
+                ========================== */
+
+                document.getElementById("tiempo").textContent =
+                    tiempo.toFixed(1) + " s";
+
+                document.getElementById("posicion").textContent =
+                    posicion.toFixed(2) + " m";
+
+                document.getElementById("distancia").textContent =
+                    distancia.toFixed(2) + " m";
+
+                document.getElementById("velocidadActual").textContent =
+                    velocidadActual.toFixed(2) + " m/s";
+
+                document.getElementById("aceleracionActual").textContent =
+                    a.toFixed(2) + " m/s²";
+
+                document.getElementById("desplazamiento").textContent =
+                    desplazamiento.toFixed(2) + " m";
+
+
+                /* Mover pelota */
+
+                moverPelota(
+                    posicion,
+                    velocidadActual
+                );
+
+
+                /* Guardar datos */
+
+                tiempos.push(tiempo);
+
+                posiciones.push(posicion);
+
+
+                /* Dibujar gráfica */
+
+                dibujarGrafica();
+
+
+                /* Final */
+
+                if (tiempo >= tiempoMax) {
+
+                    pausar();
+
+                }
+
+            }, 100);
+
+        }
+
+
+        /* =========================
+           MOVER PELOTA
+        ========================== */
+
+        function moverPelota(
+            posicion,
+            velocidadActual
+        ) {
+
+            const pelota =
+                document.getElementById("pelota");
+
+            const sombra =
+                document.getElementById("sombra");
+
+            const vector =
+                document.getElementById("vector");
+
+            const vectorTexto =
+                document.getElementById("vectorTexto");
+
+
+            /*
+                La pista representa de 0 a 100 metros.
+            */
+
+            let porcentaje =
+                posicion / 100;
+
+
+            if (porcentaje < 0) {
+
+                porcentaje = 0;
+
+            }
+
+
+            if (porcentaje > 0.9) {
+
+                porcentaje = 0.9;
+
+            }
+
+
+            const posicionVisual =
+                5 + porcentaje * 90;
+
+
+            /* Pelota */
+
+            pelota.style.left =
+                posicionVisual + "%";
+
+
+            /* Sombra */
+
+            sombra.style.left =
+                posicionVisual + "%";
+
+
+            /* =========================
+               VECTOR
+            ========================== */
+
+            let tamañoVector =
+                Math.abs(velocidadActual) * 3;
+
+
+            if (tamañoVector > 100) {
+
+                tamañoVector = 100;
+
+            }
+
+
+            vector.style.left =
+                posicionVisual + "%";
+
+            vector.style.width =
+                tamañoVector + "px";
+
+
+            /* =========================
+               TEXTO
+            ========================== */
+
+            vectorTexto.style.left =
+                posicionVisual + "%";
+
+            vectorTexto.textContent =
+                "v = " +
+                velocidadActual.toFixed(1) +
+                " m/s";
+
+        }
+
+
+        /* =========================
+           PAUSAR
+        ========================== */
+
+        function pausar() {
+
+            clearInterval(intervalo);
+
+            ejecutando = false;
+
+        }
+
+
+        /* =========================
+           REINICIAR
+        ========================== */
+
+        function reiniciar() {
+
+            pausar();
+
+
+            tiempo = 0;
+
+            posiciones = [];
+
+            tiempos = [];
+
+
+            document.getElementById("tiempo").textContent =
+                "0.0 s";
+
+            document.getElementById("posicion").textContent =
+                "0.0 m";
+
+            document.getElementById("distancia").textContent =
+                "0.0 m";
+
+            document.getElementById("velocidadActual").textContent =
+                "0.0 m/s";
+
+            document.getElementById("aceleracionActual").textContent =
+                "0.0 m/s²";
+
+            document.getElementById("desplazamiento").textContent =
+                "0.0 m";
+
+
+            moverPelota(0, 0);
+
+            dibujarGrafica();
+
+        }
+
+
+        /* =========================
+           GRÁFICA
+        ========================== */
+
+        function dibujarGrafica() {
+
+            const canvas =
+                document.getElementById("grafica");
+
+            const ctx =
+                canvas.getContext("2d");
+
+
+            canvas.width =
+                canvas.clientWidth;
+
+            canvas.height =
+                canvas.clientHeight;
+
+
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+
+            const margen = 50;
+
+            const ancho =
+                canvas.width - margen * 2;
+
+            const alto =
+                canvas.height - margen * 2;
+
+
+            /* Ejes */
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                margen,
+                margen
+            );
+
+            ctx.lineTo(
+                margen,
+                canvas.height - margen
+            );
+
+            ctx.lineTo(
+                canvas.width - margen,
+                canvas.height - margen
+            );
+
+            ctx.strokeStyle = "#334155";
+
+            ctx.lineWidth = 2;
+
+            ctx.stroke();
+
+
+            /* Texto */
+
+            ctx.fillStyle = "#334155";
+
+            ctx.font = "14px Arial";
+
+            ctx.fillText(
+                "Posición (m)",
+                10,
+                margen
+            );
+
+            ctx.fillText(
+                "Tiempo (s)",
+                canvas.width - 100,
+                canvas.height - 15
+            );
+
+
+            if (posiciones.length === 0) {
+
+                return;
+
+            }
+
+
+            const maxTiempo =
+                Math.max(...tiempos, 1);
+
+            const maxPosicion =
+                Math.max(...posiciones, 1);
+
+
+            /* Línea */
+
+            ctx.beginPath();
+
+
+            for (
+                let i = 0;
+                i < posiciones.length;
+                i++
+            ) {
+
+                const x =
+                    margen +
+                    (tiempos[i] / maxTiempo) *
+                    ancho;
+
+
+                const y =
+                    canvas.height -
+                    margen -
+                    (posiciones[i] / maxPosicion) *
+                    alto;
+
+
+                if (i === 0) {
+
+                    ctx.moveTo(x, y);
+
+                }
+
+                else {
+
+                    ctx.lineTo(x, y);
+
+                }
+
+            }
+
+
+            ctx.strokeStyle = "#2563eb";
+
+            ctx.lineWidth = 3;
+
+            ctx.stroke();
+
+
+            /* Puntos */
+
+            for (
+                let i = 0;
+                i < posiciones.length;
+                i++
+            ) {
+
+                const x =
+                    margen +
+                    (tiempos[i] / maxTiempo) *
+                    ancho;
+
+
+                const y =
+                    canvas.height -
+                    margen -
+                    (posiciones[i] / maxPosicion) *
+                    alto;
+
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    x,
+                    y,
+                    3,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fillStyle = "#1e3a8a";
+
+                ctx.fill();
+
+            }
+
+        }
+
+
+        /* =========================
+           CALCULADORA
+        ========================== */
+
+        function calcular() {
+
+            const tipo =
+                document.getElementById("calculo").value;
+
+
+            const d =
+                parseFloat(
+                    document.getElementById("cDistancia").value
+                );
+
+            const v =
+                parseFloat(
+                    document.getElementById("cVelocidad").value
+                );
+
+            const t =
+                parseFloat(
+                    document.getElementById("cTiempo").value
+                );
+
+            const vi =
+                parseFloat(
+                    document.getElementById("cVelocidadInicial").value
+                );
+
+            const a =
+                parseFloat(
+                    document.getElementById("cAceleracion").value
+                );
+
+            const vf =
+                parseFloat(
+                    document.getElementById("cVelocidadFinal").value
+                );
+
+
+            let resultado;
+
+
+            /* Distancia */
+
+            if (tipo === "distancia") {
+
+                resultado = v * t;
+
+                mostrarResultado(
+                    "Distancia = " +
+                    resultado.toFixed(2) +
+                    " m"
+                );
+
+            }
+
+
+            /* Velocidad */
+
+            else if (tipo === "velocidad") {
+
+                if (t === 0) {
+
+                    mostrarResultado(
+                        "El tiempo no puede ser 0."
+                    );
+
+                    return;
+
+                }
+
+
+                resultado = d / t;
+
+
+                mostrarResultado(
+                    "Velocidad = " +
+                    resultado.toFixed(2) +
+                    " m/s"
+                );
+
+            }
+
+
+            /* Tiempo */
+
+            else if (tipo === "tiempo") {
+
+                if (v === 0) {
+
+                    mostrarResultado(
+                        "La velocidad no puede ser 0."
+                    );
+
+                    return;
+
+                }
+
+
+                resultado = d / v;
+
+
+                mostrarResultado(
+                    "Tiempo = " +
+                    resultado.toFixed(2) +
+                    " s"
+                );
+
+            }
+
+
+            /* Aceleración */
+
+            else if (tipo === "aceleracion") {
+
+                if (t === 0) {
+
+                    mostrarResultado(
+                        "El tiempo no puede ser 0."
+                    );
+
+                    return;
+
+                }
+
+
+                resultado =
+                    (vf - vi) / t;
+
+
+                mostrarResultado(
+                    "Aceleración = " +
+                    resultado.toFixed(2) +
+                    " m/s²"
+                );
+
+            }
+
+
+            /* Velocidad final */
+
+            else if (
+                tipo === "velocidadFinal"
+            ) {
+
+                resultado =
+                    vi + a * t;
+
+
+                mostrarResultado(
+                    "Velocidad final = " +
+                    resultado.toFixed(2) +
+                    " m/s"
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           MOSTRAR RESULTADO
+        ========================== */
+
+        function mostrarResultado(texto) {
+
+            document.getElementById(
+                "resultado"
+            ).textContent =
+                "Resultado: " + texto;
+
+        }
+
+
+        /* =========================
+           CAMBIO MRU / MRUA
+        ========================== */
+
+        document.getElementById("tipo")
+            .addEventListener(
+                "change",
+                function() {
+
+                    if (this.value === "MRU") {
+
+                        document.getElementById(
+                            "aceleracion"
+                        ).value = 0;
+
+                    }
+
+                }
+            );
+
+
+        /* =========================
+           INICIALIZAR
+        ========================== */
+
+        moverPelota(0, 0);
+
+        dibujarGrafica();
+
+    </script>
+
+</body>
+</html>
+```
